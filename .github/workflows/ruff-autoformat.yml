@@ -1,0 +1,43 @@
+name: Autoformat with Ruff
+
+on:
+  push:
+    branches: [ main, master ]
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Run Ruff formatter
+        run: ruff format .
+
+      - name: Opcional – También corregir lint automáticamente
+        run: ruff check --fix .
+
+      - name: Commit and push changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --staged --quiet; then
+            echo "No hay cambios que commitear"
+          else
+            git commit -m "style: autoformateo con Ruff [skip ci]"
+            git push
+          fi
