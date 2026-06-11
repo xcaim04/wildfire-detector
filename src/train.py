@@ -10,7 +10,7 @@ def generate_polynomial_data(n_samples=300, noise_std=0.15, x_range=(-2, 2)):
     y = polynomial(X) + np.random.normal(0, noise_std, (n_samples, 1))
     return X, y
 
-def train_and_save(model_path="weights/polynomial_model.npz"):
+def train():
     
     X_train, y_train = generate_polynomial_data()
     model = PolynomialNeuralNetwork(input_size=1, hidden_size=20, output_size=1)

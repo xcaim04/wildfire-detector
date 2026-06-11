@@ -1,6 +1,8 @@
 import numpy as np
 
 from src.model import PolynomialNeuralNetwork
+from pydantic import BaseModel, Field
+from typing import List
 
 class PredictRequest(BaseModel):
     x: List[float] = Field(..., description="Lista de valores x para predecir f(x)")

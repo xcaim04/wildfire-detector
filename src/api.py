@@ -1,10 +1,7 @@
 import numpy as np
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-from typing import List
-
-from model import PolynomialNeuralNetwork
 from src.utils import PredictRequest, PredictResponse, create_and_train_model
+from pydantic import BaseModel, Field
 
 
 model = create_and_train_model()
