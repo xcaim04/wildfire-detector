@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class PolynomialNeuralNetwork:
     def __init__(self, input_size=1, hidden_size=20, output_size=1):
         self.input_size = input_size
