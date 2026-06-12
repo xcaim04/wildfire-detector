@@ -1,92 +1,135 @@
+import torch
+import torch.nn as nn
+import torch.optim as optim
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 
-"""
-La RED neuronal funciona, pero tiene errores en la aproximacion
-no es una aproximacion perfecta, y no se si es por el modelo o por el entrenamiento.
-Hay que revisar el modelo, y el entrenamiento, y ver si se puede mejorar la aproximacion.
-
-Entrada x   Valor Real Teórico f(x)   Predicción de la Red   Error Absoluto
-0.0         1.0000                     1.2600                 0.2600
-0.5         1.1250                     0.8976                 0.2274
-1.0         2.0000                     2.2599                 0.2599
--0.5        0.1250                     0.1877                 0.0627
-2.0         12.0000                    9.9631                 2.0369
-
-"""
-
-class PolynomialNeuralNetwork:
-    def __init__(self, input_size=1, hidden_size=128, output_size=1, learning_rate=0.005):
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.output_size = output_size
-        self.lr = learning_rate
-
-        # Inicialización de pesos con He initialization, que dayron me pregunto y no sabia bien.
-        # es mejor para ReLU y ayuda a evitar el problema de desvanecimiento de gradiente.
-        # Hay que estudiar: Por que?
-        self.W1 = np.random.randn(input_size, hidden_size) * np.sqrt(2.0 / input_size)
-        self.b1 = np.zeros((1, hidden_size))
-        
-        self.W2 = np.random.randn(hidden_size, output_size) * np.sqrt(2.0 / hidden_size)
-        self.b2 = np.zeros((1, output_size))
-
-    def relu(self, x):
-        return np.maximum(0, x)
+# ------------------------------------------------------------
+# 1. Definición del modelo (exactamente el que tú mostraste)
+# ------------------------------------------------------------
+class PolynomialNN(nn.Module):
+    def __init__(self, input_size=1, hidden_size=128, output_size=1):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(input_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, output_size)
+        )
 
     def forward(self, x):
-        self.x = x
-        self.z1 = x @ self.W1 + self.b1
-        self.a1 = self.relu(self.z1)
-        self.z2 = self.a1 @ self.W2 + self.b2
-        return self.z2
+        return self.net(x)
 
-    def backward(self, d_loss):
-        d_z2 = d_loss
-        self.d_W2 = self.a1.T @ d_z2
-        self.d_b2 = np.sum(d_z2, axis=0, keepdims=True)
+# ------------------------------------------------------------
+# 2. Generar datos sintéticos a partir de un polinomio multivariado
+# ------------------------------------------------------------
+# Función objetivo: f(x, y, z) = 0.5*x^2 + 1.2*y + 0.8*z^3 - 0.3*x*y*z + 0.2
+def polinomio_real(x, y, z):
+    return 0.5 * x**2 + 1.2 * y + 0.8 * z**3 - 0.3 * x * y * z + 0.2
 
-        d_a1 = d_z2 @ self.W2.T
+# Número de muestras
+n_samples = 5000
+
+# Generar valores aleatorios en un rango razonable
+np.random.seed(42)
+x_data = np.random.uniform(-2, 2, n_samples)
+y_data = np.random.uniform(-1, 3, n_samples)
+z_data = np.random.uniform(-1.5, 1.5, n_samples)
+
+# Calcular la salida real
+y_real = polinomio_real(x_data, y_data, z_data)
+
+# Añadir un poco de ruido para simular datos reales (opcional)
+ruido = np.random.normal(0, 0.05, n_samples)
+y_real_noisy = y_real + ruido
+
+# Convertir a tensores de PyTorch
+X = np.column_stack((x_data, y_data, z_data))  # forma (n_samples, 3)
+X_tensor = torch.tensor(X, dtype=torch.float32)
+y_tensor = torch.tensor(y_real_noisy, dtype=torch.float32).view(-1, 1)
+
+# Dividir en entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(
+    X_tensor, y_tensor, test_size=0.2, random_state=42
+)
+
+# ------------------------------------------------------------
+# 3. Instanciar el modelo, función de pérdida y optimizador
+# ------------------------------------------------------------
+input_dim = 3          # porque tenemos x, y, z
+hidden_dim = 128       # neuronas en la capa oculta
+output_dim = 1
+
+modelo = PolynomialNN(input_size=input_dim, hidden_size=hidden_dim, output_size=output_dim)
+criterio = nn.MSELoss()                     # error cuadrático medio
+optimizador = optim.Adam(modelo.parameters(), lr=0.001)
+
+# ------------------------------------------------------------
+# 4. Entrenamiento
+# ------------------------------------------------------------
+num_epochs = 300
+batch_size = 64
+
+# Para guardar la evolución de la pérdida
+perdidas_entrenamiento = []
+perdidas_prueba = []
+
+for epoch in range(num_epochs):
+    # Modo entrenamiento
+    modelo.train()
+    
+    # Mezclar datos y procesar por lotes
+    indices = torch.randperm(X_train.shape[0])
+    for i in range(0, X_train.shape[0], batch_size):
+        batch_indices = indices[i:i+batch_size]
+        X_batch = X_train[batch_indices]
+        y_batch = y_train[batch_indices]
         
-        d_z1 = d_a1 * (self.a1 > 0).astype(float)
+        optimizador.zero_grad()
+        predicciones = modelo(X_batch)
+        loss = criterio(predicciones, y_batch)
+        loss.backward()
+        optimizador.step()
+    
+    # Evaluación en train y test cada 10 épocas
+    if epoch % 10 == 0:
+        modelo.eval()
+        with torch.no_grad():
+            pred_train = modelo(X_train)
+            loss_train = criterio(pred_train, y_train)
+            pred_test = modelo(X_test)
+            loss_test = criterio(pred_test, y_test)
         
-        # CORRECCIÓN: Quitamos la división por 'n' que estaba duplicada aquí
-        self.d_W1 = self.x.T @ d_z1
-        self.d_b1 = np.sum(d_z1, axis=0, keepdims=True)
+        perdidas_entrenamiento.append(loss_train.item())
+        perdidas_prueba.append(loss_test.item())
+        print(f"Época {epoch:3d} | Pérdida train: {loss_train.item():.6f} | Pérdida test: {loss_test.item():.6f}")
 
-    def update(self):
-        self.W1 -= self.lr * self.d_W1
-        self.b1 -= self.lr * self.d_b1
-        self.W2 -= self.lr * self.d_W2
-        self.b2 -= self.lr * self.d_b2
+# ------------------------------------------------------------
+# 5. Evaluación final y gráfica
+# ------------------------------------------------------------
+modelo.eval()
+with torch.no_grad():
+    predicciones_finales = modelo(X_test)
+    error_final = criterio(predicciones_finales, y_test)
+    print(f"\nError cuadrático medio final en test: {error_final.item():.6f}")
 
-    # CORRECCIÓN CRÍTICA: Se añade 'lr=None' a los argumentos para solucionar tu TypeError
-    def fit(self, X, y, epochs=20000, lr=None, verbose=True):
-        # Si se pasa un lr en fit(), actualiza el learning rate de la red
-        if lr is not None:
-            self.lr = lr
+# Mostrar comparación entre valor real y predicción (primeros 20 ejemplos de test)
+print("\nMuestra de predicciones vs valores reales:")
+print("   Real    |   Predicho")
+print("------------------------")
+with torch.no_grad():
+    for i in range(20):
+        real = y_test[i].item()
+        pred = modelo(X_test[i:i+1]).item()
+        print(f"{real:9.4f} | {pred:9.4f}")
 
-        # Normalización de y para mejorar la estabilidad del entrenamiento
-        self.y_mean = np.mean(y)
-        self.y_std = np.std(y) + 1e-8
-        y_norm = (y - self.y_mean) / self.y_std
-
-        n = X.shape[0]
-
-        for epoch in range(epochs):
-            y_pred_norm = self.forward(X)
-
-            # MSE
-            loss = np.mean((y_pred_norm - y_norm) ** 2)
-            
-            # El gradiente de la pérdida se promedia aquí dividiendo por el número de muestras 'n'
-            d_loss = 2 * (y_pred_norm - y_norm) / n
-            
-            self.backward(d_loss)
-            self.update()
-            
-            if verbose and epoch % 1000 == 0:
-                print(f"Epoch {epoch:6d} | Loss: {loss:.6f}")
-
-    def predict(self, X):
-        y_pred_norm = self.forward(X)
-        return y_pred_norm * self.y_std + self.y_mean
+# Opcional: gráfica de pérdidas
+plt.figure(figsize=(10,5))
+plt.plot(range(0, num_epochs, 10), perdidas_entrenamiento, label='Entrenamiento')
+plt.plot(range(0, num_epochs, 10), perdidas_prueba, label='Prueba')
+plt.xlabel('Época')
+plt.ylabel('Pérdida (MSE)')
+plt.title('Evolución del error durante el entrenamiento')
+plt.legend()
+plt.grid(True)
+plt.show()
