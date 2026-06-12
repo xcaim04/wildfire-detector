@@ -1,7 +1,8 @@
 import numpy as np
 from model import PolynomialNeuralNetwork
 
-polynomial = lambda x: 2*x**3 - 1.5*x**2 + 0.5*x + 1
+def polynomial(x): 
+    return 2*x**3 - 1.5*x**2 + 0.5*x + 1
 
 def generate_polynomial_data(n_samples=300, noise_std=0.15, x_range=(-2, 2)):
 

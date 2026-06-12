@@ -28,7 +28,7 @@ jobs:
         run: ruff format .
 
       - name: Opcional – También corregir lint automáticamente
-        run: ruff check --fix .
+        run: ruff check --unsafe-fixes .
 
       - name: Commit and push changes if any
         run: |
