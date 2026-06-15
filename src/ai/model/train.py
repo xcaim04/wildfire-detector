@@ -4,8 +4,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
-from data.data import load_and_process_data
-from model.network import WildfireNet
+from src.ai.data.data import load_and_process_data
+from src.ai.model.network import WildfireNet
 
 def train_model():
     
