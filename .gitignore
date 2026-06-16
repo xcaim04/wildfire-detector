@@ -1,0 +1,32 @@
+# Environments & Virtual Envs
+.venv/
+venv/
+env/
+ENV/
+bin/
+lib/
+include/
+
+# PyTorch Trained Models & Serialized Scalers (Production Binaries)
+src/ai/model/*.pth
+src/ai/data/*.pkl
+*.pth
+*.pkl
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+
+# OS Specific Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs and Code Editors
+.vscode/
+.idea/
+*.swp
+*.swo
