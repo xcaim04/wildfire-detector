@@ -7,18 +7,18 @@ class WildfireNet(nn.Module):
         super(WildfireNet, self).__init__()
 
         self.network = nn.Sequential(
-            nn.Linear(input_dim, 32),
+            # Capa 1: Entran 12 variables climáticas y salen 8
+            nn.Linear(input_dim, 8),
+            nn.ReLU(),
+            nn.Dropout(p=0.3),
+            
+            # Capa 2: Entran 8 (del paso anterior) y salen 4
+            nn.Linear(8, 4),
             nn.ReLU(),
             nn.Dropout(p=0.2),
             
-            nn.Linear(32, 16),
-            nn.ReLU(),
-            nn.Dropout(p=0.2),
-            
-            nn.Linear(16, 8),
-            nn.ReLU(),
-            
-            nn.Linear(8, 1),
+            # Capa 3: Entran 4 (del paso anterior) y sale 1 probabilidad
+            nn.Linear(4, 1),
             nn.Sigmoid()
         )
         

@@ -19,7 +19,7 @@ def train_model() -> None:
     # 3. Instantiate model, loss function, and optimizer
     model = WildfireNet(input_dim=X_train.shape[1])
     criterion = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-3)
     
     # 4. Training loop
     epochs = 100
