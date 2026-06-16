@@ -5,9 +5,9 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
 
-from src.ai.model.network import WildfireNet
+from src.ai.model.model import WildfireNet
 from src.ai.data.data import load_and_process_data
-from src.ai.train import train_model
+from src.ai.model.train import train_model
 
 router = APIRouter(prefix="/wildfire", tags=["Wildfire Prediction System"])
 

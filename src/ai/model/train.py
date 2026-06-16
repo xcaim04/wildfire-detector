@@ -5,9 +5,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
 from src.ai.data.data import load_and_process_data
-from src.ai.model.network import WildfireNet
+from src.ai.model.model import WildfireNet
 
-def train_model():
+def train_model() -> None:
     
     # 1. Load the processed tensors
     X_train, X_test, y_train, y_test = load_and_process_data()
@@ -54,8 +54,8 @@ def train_model():
                 
             print(f"Epoch [{epoch+1}/{epochs}] -> Train Loss: {epoch_loss:.4f} | Test Loss: {test_loss:.4f} | Test Accuracy: {accuracy*100:.2f}%")
 
-    # 6. Save the trained model weights next to the network file
+    # 6. Save the trained model weights directly into the current 'model' directory
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    weights_path = os.path.join(current_dir, 'model', 'wildfire_model.pth')
+    weights_path = os.path.join(current_dir, 'wildfire_model.pth')
     torch.save(model.state_dict(), weights_path)
     print(f"Training complete. Weights saved to: {weights_path}")

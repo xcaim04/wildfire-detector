@@ -3,7 +3,7 @@ import torch.nn as nn
 
 class WildfireNet(nn.Module):
     
-    def __init__(self, input_dim=11):
+    def __init__(self, input_dim=12):
         super(WildfireNet, self).__init__()
 
         self.network = nn.Sequential(

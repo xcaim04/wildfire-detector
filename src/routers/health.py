@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ai.model import model
+from src.ai.model import model
 
 router = APIRouter()
 
