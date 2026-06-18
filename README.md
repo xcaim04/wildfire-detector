@@ -140,4 +140,6 @@ Beatriz Machin Ordaz  | Github user: BeatrizM50
 
 Ana Laura Reinoso Fernandez | Github user: annarei25
 
+Alejandro Miló Llanos | Github user: AlejandroMilo
+
 * **Final Project for Numerical Mathematics.**
