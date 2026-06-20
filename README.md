@@ -142,4 +142,6 @@ Ana Laura Reinoso Fernandez | Github user: annarei25
 
 Alejandro Miló Llanos | Github user: AlejandroMilo
 
+Randy Valle Lopez | Github user: randyvalle1973
+
 * **Final Project for Numerical Mathematics.**
