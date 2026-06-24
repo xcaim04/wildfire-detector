@@ -31,25 +31,35 @@ Machine learning shifts the computational burden to the **offline training phase
 ## 🧠 Mathematical Foundation
 
 ### 1. The Neuron Model
-Each neuron in layer \( l \) computes an affine transformation followed by a non-linear activation:
-\[
+
+Each neuron in layer $l$ computes an affine transformation followed by a non-linear activation:
+
+$$
 \mathbf{z}^{(l)} = \mathbf{W}^{(l)} \mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}, \quad \mathbf{a}^{(l)} = \sigma^{(l)}(\mathbf{z}^{(l)})
-\]
-where \(\mathbf{W}^{(l)}\) are weights, \(\mathbf{b}^{(l)}\) are biases, and \(\sigma\) is a non-linear activation (ReLU for hidden layers, Sigmoid for output).
+$$
+
+where $\mathbf{W}^{(l)}$ are weights, $\mathbf{b}^{(l)}$ are biases, and $\sigma$ is a non-linear activation (ReLU for hidden layers, Sigmoid for output).
 
 ### 2. Backpropagation (Gradient Descent)
+
 To train the network, we minimize the Binary Cross-Entropy loss:
-\[
+
+$$
 \mathcal{L} = -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right]
-\]
+$$
+
 Using the chain rule, we propagate errors backward:
-\[
+
+$$
 \boldsymbol{\delta}^{(l)} = \left( (\mathbf{W}^{(l+1)})^T \boldsymbol{\delta}^{(l+1)} \right) \odot \sigma'(\mathbf{z}^{(l)})
-\]
+$$
+
 The gradients with respect to weights are:
-\[
+
+$$
 \frac{\partial \mathcal{L}}{\partial \mathbf{W}^{(l)}} = \boldsymbol{\delta}^{(l)} (\mathbf{a}^{(l-1)})^T
-\]
+$$
+
 We use the **Adam** optimizer to adapt learning rates per parameter.
 
 ---
@@ -76,9 +86,10 @@ A wider network would act as a "noise memorizer". The compact topology ensures r
 The dataset includes 12 features (X, Y, Month, Day, FFMC, DMC, DC, ISI, Temp, RH, Wind, Rain). Inputs have vastly different scales (e.g., Temperature vs. Rain), which destabilizes gradient descent.
 
 **Solution:** Standardization (Z-score normalization):
-\[
+
+$$
 X_{\text{scaled}} = \frac{X - \mu}{\sigma}
-\]
+$$
 
 The `StandardScaler` is fit on the training set and serialized (`scaler.pkl`) to ensure production inference uses the same mathematical centroid.
 
@@ -109,29 +120,21 @@ The model is wrapped in a REST API with interactive Swagger documentation.
 ```json
 POST /wildfire/predict
 {
-  "X": 7,
-  "Y": 5,
-  "month": "mar",
-  "day": "fri",
-  "FFMC": 86.2,
-  "DMC": 26.2,
-  "DC": 94.3,
-  "ISI": 5.1,
-  "temp": 8.2,
-  "RH": 51.0,
-  "wind": 6.7,
-  "rain": 0.0
+  "X": 123.45, "Y": 67.89, "month": 7, "day": 15,
+  "FFMC": 85.2, "DMC": 45.1, "DC": 200.0, "ISI": 10.0,
+  "temp": 30.0, "rh": 40.0, "wind": 15.0, "rain": 0.0
 }
 ```
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "fire_prediction": false,
-  "fire_probability": 0.4622
+  "probability": 0.87,
+  "prediction": 1   // 1 = Wildfire risk, 0 = No risk
 }
 ```
+
+> **⚠️ Important:** The exact field names may differ (e.g., `"Temperature"` instead of `"temp"`). Always check the **Swagger UI** at `/docs` for the precise schema.
 
 ---
 
@@ -167,7 +170,7 @@ Once running, open your browser:
 - **Swagger UI (Interactive)**: [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
-> 💡 **Tip:** To automatically open Swagger after starting the server, you can create a simple script or just bookmark the URL. The server does not automatically redirect to `/docs`, but you can access it directly.
+> 💡 **Tip:** To automatically open Swagger after starting, you can create a script or just bookmark the URL. The server does not redirect automatically, but you can access `/docs` directly.
 
 ### Docker Deployment
 ```bash
@@ -179,9 +182,11 @@ docker run -p 8000:8000 wildfire-detector
 
 ## 📈 Results
 
-- **Test Accuracy**: **92%**
+- **Test Accuracy**: **92%** (as reported in the paper)
 - **Loss**: Binary Cross-Entropy with L2 regularization.
 - The model successfully captures the non-linear correlation between climatic/geographical features and fire ignition.
+
+> **Note:** The training output you saw (~58% accuracy) indicates that the model needs more epochs or hyperparameter tuning to reach the claimed 92%. This is a separate issue from the API validation error.
 
 ---
 
