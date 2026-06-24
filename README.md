@@ -109,17 +109,27 @@ The model is wrapped in a REST API with interactive Swagger documentation.
 ```json
 POST /wildfire/predict
 {
-  "X": 123.45, "Y": 67.89, "month": 7, "day": 15,
-  "FFMC": 85.2, "DMC": 45.1, "DC": 200.0, "ISI": 10.0,
-  "temp": 30.0, "rh": 40.0, "wind": 15.0, "rain": 0.0
+  "X": 7,
+  "Y": 5,
+  "month": "mar",
+  "day": "fri",
+  "FFMC": 86.2,
+  "DMC": 26.2,
+  "DC": 94.3,
+  "ISI": 5.1,
+  "temp": 8.2,
+  "RH": 51.0,
+  "wind": 6.7,
+  "rain": 0.0
 }
 ```
 
 **Response:**
 ```json
 {
-  "probability": 0.87,
-  "prediction": 1   // 1 = Wildfire risk, 0 = No risk
+  "status": "success",
+  "fire_prediction": false,
+  "fire_probability": 0.4622
 }
 ```
 
