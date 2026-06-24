@@ -1,5 +1,3 @@
-
-
 def test_health_check(client):
     """Verifies that the core infrastructure health router responds with 200 OK."""
     response = client.get("/health")
