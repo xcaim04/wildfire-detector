@@ -102,7 +102,7 @@ The `StandardScaler` is fit on the training set and serialized (`scaler.pkl`) to
 
 The model is wrapped in a REST API with interactive Swagger documentation.
 
-![Wildfire Risk AI Prediction API](public/image.png)  
+![Wildfire Risk AI Prediction API](public/api.png)  
 *Swagger UI (OAS 3.1) displaying the /predict, /train, /process-data, and /status endpoints.*
 
 ### Available Endpoints
